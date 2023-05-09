@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './App.css'; // Your external CSS file
+import './App.css';
 
 const App = () => {
   const [newItem, setNewItem] = useState("");

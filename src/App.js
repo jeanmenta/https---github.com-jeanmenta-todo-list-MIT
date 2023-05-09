@@ -1,76 +1,63 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css'; // Your external CSS file
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      newItem: "",
-      list: JSON.parse(localStorage.getItem('list')) || []
-    };
-  }
+const App = () => {
+  const [newItem, setNewItem] = useState("");
+  const [list, setList] = useState(() => {
+    // Retrieve the list from local storage when the component is mounted
+    const savedList = localStorage.getItem('list');
+    return savedList ? JSON.parse(savedList) : [];
+  });
 
-  updateInput(key, value) {
-    this.setState({
-      [key]: value
-    });
-  }
+  useEffect(() => {
+    // Save the list to local storage whenever it changes
+    localStorage.setItem('list', JSON.stringify(list));
+  }, [list]);
 
-  addItem() {
-    const newItem = {
+  const updateInput = (value) => {
+    setNewItem(value);
+  };
+
+  const addItem = () => {
+    const item = {
       id: 1 + Math.random(),
-      value: this.state.newItem.slice()
+      value: newItem.slice()
     };
 
-    const list = [...this.state.list];
-    list.push(newItem);
+    setList([...list, item]);
+    setNewItem("");
+  };
 
-    this.setState({
-      list,
-      newItem: ""
-    }, () => {
-      localStorage.setItem('list', JSON.stringify(this.state.list));
-    });
-  }
+  const deleteItem = (id) => {
+    setList(list.filter(item => item.id !== id));
+  };
 
-  deleteItem(id) {
-    const list = [...this.state.list];
-    const updatedList = list.filter(item => item.id !== id);
-    this.setState({ list: updatedList }, () => {
-      localStorage.setItem('list', JSON.stringify(this.state.list));
-    });
-  }
-
-  render() {
-    return (
-      <div className="App">
-        <div>
-          <input
-            type="text"
-            placeholder="Type item here..."
-            value={this.state.newItem}
-            onChange={e => this.updateInput("newItem", e.target.value)}
-          />
-          <button onClick={() => this.addItem()}>
-            Add
-          </button>
-          <br />
-          <ul>
-            {this.state.list.map(item => {
-              return (
-                <li key={item.id}>
-                  {item.value}
-                  <button onClick={() => this.deleteItem(item.id)}>
-                    X
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+  return (
+    <div className="App">
+      <div>
+        <input
+          type="text"
+          placeholder="Type item here..."
+          value={newItem}
+          onChange={e => updateInput(e.target.value)}
+        />
+        <button onClick={addItem}>
+          Add
+        </button>
+        <br />
+        <ul>
+          {list.map(item => (
+            <li key={item.id}>
+              {item.value}
+              <button onClick={() => deleteItem(item.id)}>
+                X
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 export default App;
